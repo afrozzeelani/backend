@@ -208,14 +208,14 @@ const createEmployee = async (req, res) => {
       Account,
       Gender,
       FirstName,
-      MiddleName,
       LastName,
       DOB,
       ContactNo,
       EmployeeCode,
       DepartmentID,
       PositionID,
-      DateOfJoining
+      DateOfJoining,
+      reportManager
     } = req.body;
     const newEmployee = new Employee({
       empID: newUserID,
@@ -225,7 +225,7 @@ const createEmployee = async (req, res) => {
       Account: Account,
       Gender: Gender,
       FirstName: FirstName,
-      MiddleName: MiddleName,
+      reportManager: reportManager,
       LastName: LastName,
       DOB: DOB,
       ContactNo: ContactNo,
@@ -347,14 +347,14 @@ const updateEmployee = async (req, res) => {
     Account,
     Gender,
     FirstName,
-    MiddleName,
     LastName,
     DOB,
     ContactNo,
     EmployeeCode,
     DepartmentID,
     PositionID,
-    DateOfJoining
+    DateOfJoining,
+    reportManager
   } = req.body;
   try {
     const findEmployee = await Employee.findById(req.params.id);
@@ -368,7 +368,6 @@ const updateEmployee = async (req, res) => {
       role: RoleID,
       Gender: Gender,
       FirstName: FirstName,
-      MiddleName: MiddleName,
       LastName: LastName,
       DOB: DOB,
       ContactNo: ContactNo,
@@ -376,6 +375,7 @@ const updateEmployee = async (req, res) => {
       department: DepartmentID,
       position: PositionID,
       DateOfJoining: DateOfJoining,
+      reportManager: reportManager,
       profile: findEmployee.profile // Default to existing profile
     };
 

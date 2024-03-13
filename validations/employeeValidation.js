@@ -1,5 +1,4 @@
-
-const Joi = require('joi')
+const Joi = require("joi");
 
 const EmployeeValidation = Joi.object().keys({
   RoleID: Joi.optional(),
@@ -7,7 +6,7 @@ const EmployeeValidation = Joi.object().keys({
   DepartmentID: Joi.optional(),
   SalaryID: Joi.optional(),
   FirstName: Joi.string().max(200).required(),
-  MiddleName: Joi.string().max(200).required(),
+  reportManager: Joi.optional(),
   LastName: Joi.string().max(200).required(),
   Email: Joi.string().max(200).required(),
   Password: Joi.string().max(100).required(),
@@ -21,14 +20,14 @@ const EmployeeValidation = Joi.object().keys({
   // EmployeeCode: Joi.string().max(100).required(),
   Account: Joi.number().max(3).required()
 });
-  
+
 const EmployeeValidationUpdate = Joi.object().keys({
   RoleID: Joi.optional(),
   PositionID: Joi.optional(),
   DepartmentID: Joi.optional(),
   SalaryID: Joi.optional(),
   FirstName: Joi.string().max(200).required(),
-  MiddleName: Joi.string().max(200).required(),
+  reportManager: Joi.optional(),
   LastName: Joi.string().max(200).required(),
   Email: Joi.string().max(200).required(),
   Gender: Joi.string().max(100).required(),
@@ -41,7 +40,7 @@ const EmployeeValidationUpdate = Joi.object().keys({
   // EmployeeCode: Joi.string().max(100).required(),
   Account: Joi.number().max(3).required()
 });
-  
+
 const EmployeePersonalInfoValidation = Joi.object().keys({
   BloodGroup: Joi.string().max(10).required(),
   DOB: Joi.date().required(),
@@ -56,9 +55,8 @@ const EmployeePersonalInfoValidation = Joi.object().keys({
   PresentAddress: Joi.string().max(200).required()
 });
 
-
-  module.exports = {
-    EmployeeValidation,
-    EmployeePersonalInfoValidation,
-    EmployeeValidationUpdate
-  }
+module.exports = {
+  EmployeeValidation,
+  EmployeePersonalInfoValidation,
+  EmployeeValidationUpdate
+};

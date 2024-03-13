@@ -3,10 +3,17 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const http = require("http");
 const mongoose = require("mongoose");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 require("dotenv").config();
 
 // acss the shows bdf file backend
@@ -103,54 +110,89 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/api/tasks", upload.single("file"), async (req, res) => {
-  console.log(req.file);
-  const { Taskname } = req.body;
-  const { path } = req.file;
-  const { description } = req.body;
-  const { department } = req.body;
-  const { managerEmail } = req.body;
-  const { comment } = req.body;
-  const { duration } = req.body;
-  const { status } = req.body;
-  const { startDate } = req.body;
-  const { endDate } = req.body;
+// app.post("/api/tasks", upload.single("file"), async (req, res) => {
+//   console.log(req.file);
+//   const { Taskname } = req.body;
+//   const { path } = req.file;
+//   const { description } = req.body;
+//   const { department } = req.body;
+//   const { managerEmail } = req.body;
+//   const { comment } = req.body;
+//   const { duration } = req.body;
+//   const { status } = req.body;
+//   const { startDate } = req.body;
+//   const { endDate } = req.body;
+//   const {adminMail} = req.body;
 
-  const dateDifference = Math.ceil(
-    (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
-  );
-  const extradate = dateDifference;
-  const newPdf = new Task({
-    Taskname: Taskname,
-    pdf: path,
-    description: description,
-    department: department,
-    managerEmail: managerEmail,
-    comment: "Task Assigned",
-    duration: extradate,
-    status: "Assigned",
-    startDate: startDate,
-    endDate: endDate,
-    employee: [{ type: mongoose.Schema.Types.ObjectId, ref: "Employee" }]
-  });
-  console.log("newPdf ====", newPdf);
+//   const dateDifference = Math.ceil(
+//     (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
+//   );
+//   const extradate = dateDifference;
+//   const newPdf = new Task({
+//     Taskname: Taskname,
+//     pdf: path,
+//     adminMail,
+//     description: description,
+//     department: department,
+//     managerEmail: managerEmail,
+//     comment: "Task Assigned",
+//     duration: extradate,
+//     status: "Assigned",
+//     startDate: startDate,
+//     endDate: endDate,
+//     employee: [{ type: mongoose.Schema.Types.ObjectId, ref: "Employee" }]
+//   });
+//   console.log("newPdf ====", newPdf);
 
-  // console.log(Taskname, path, description, department, managerEmail, comment, duration, status, startDate, endDate);
-  try {
-    // await PdfSchema.create({ title: title, pdf: fileName });
+//   // console.log(Taskname, path, description, department, managerEmail, comment, duration, status, startDate, endDate);
+//   try {
+//     // await PdfSchema.create({ title: title, pdf: fileName });
 
-    await newPdf.save();
-    res.status(201).json({
-      message: "ok"
-    });
-    // res.send({ status: "ok", data: newPdf });
-  } catch (error) {
-    res.status(400).send(error);
-    // res.json({ status: error });
-  }
-});
+//     await newPdf.save();
+//     res.status(201).json({
+//       message: "ok"
+//     });
+//     // res.send({ status: "ok", data: newPdf });
+//   } catch (error) {
+//     res.status(400).send(error);
+//     // res.json({ status: error });
+//   }
+// });
 //////
+// app.post("/api/notice", upload.single("file"), async (req, res) => {
+//   const {noticeId} = req.body;
+//   const { notice } = req.body;
+//   const { path } = req.file;
+//   console.log(notice, path);
 
+//   // socket.emit("hello","hi")
+
+//   // console.log(Taskname, path, description, department, managerEmail, comment, duration, status, startDate, endDate);
+//   try {
+//     // await PdfSchema.create({ title: title, pdf: fileName });
+//    await Employee.updateMany(
+//       {},
+//       {
+//           $push: {
+//               Notice: {
+//                   notice: notice,
+//                   noticeId,
+//                   attachments: path
+//               },
+//           },
+//       },
+//       { new: true }
+//   );
+//     // await newPdf.save();
+//     res.status(201).json({
+//       message: "ok"
+//     });
+//     // res.send({ status: "ok", data: newPdf });
+//   } catch (error) {
+//     res.status(400).send(error);
+//     // res.json({ status: error });
+//   }
+// });
 app.get("/api/getTask", async (req, res) => {
   console.log;
   try {
@@ -222,6 +264,347 @@ app.post("/api/tasks/:taskId/employees", async (req, res) => {
 
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+// app.post("/api/notice", upload.single("file"), async (req, res) => {
+
+//   const { notice } = req.body;
+//   const { path } = req.file;
+
+//   // console.log(Taskname, path, description, department, managerEmail, comment, duration, status, startDate, endDate);
+//   try {
+//     // await PdfSchema.create({ title: title, pdf: fileName });
+
+//     await newPdf.save();
+//     res.status(201).json({
+//       message: "ok"
+//     });
+//     // res.send({ status: "ok", data: newPdf });
+//   } catch (error) {
+//     res.status(400).send(error);
+//     // res.json({ status: error });
+//   }
+// });
+const users = {};
+io.on("connection", (socket) => {
+  console.log("server================", socket.id);
+  //abhay:- here user is connecting and we are storing socket id and Mail
+  socket.on("userConnected", (userData) => {
+    users[socket.id] = { email: userData.email, socketId: socket.id };
+    console.log("heelloo", users);
+  });
+  //abhay:- when browser get closed or user get offline than this is automatically get trigger no need to trigger it manually
+  socket.on("disconnect", () => {
+    const disconnectedUser = users[socket.id];
+    if (disconnectedUser) {
+      delete users[socket.id];
+    }
+  });
+
+  //abhay:-admin want to send  notice to every employee
+  app.post("/api/notice", upload.single("file"), async (req, res) => {
+    const { noticeId } = req.body;
+    const { notice } = req.body;
+    const { path } = req.file;
+    const data = {
+      noticeId,
+      notice,
+      attachments: path
+    };
+
+    // console.log(Taskname, path, description, department, managerEmail, comment, duration, status, startDate, endDate);
+    try {
+      // await PdfSchema.create({ title: title, pdf: fileName });
+
+      await Employee.updateMany(
+        {},
+        {
+          $push: {
+            Notice: {
+              notice: notice,
+              noticeId,
+              attachments: path
+            }
+          }
+        },
+        { new: true }
+      );
+      io.emit("notice", data);
+      // await newPdf.save();
+      res.status(201).json({
+        message: "ok"
+      });
+      // res.send({ status: "ok", data: newPdf });
+    } catch (error) {
+      res.status(400).send(error);
+      // res.json({ status: error });
+    }
+  });
+  //abhay:-admin want to delete notice from every employee dashboard
+
+  app.post("/api/noticeDelete", async (req, res) => {
+    const { noticeId } = req.body;
+
+    // console.log(Taskname, path, description, department, managerEmail, comment, duration, status, startDate, endDate);
+    try {
+      // await PdfSchema.create({ title: title, pdf: fileName });
+
+      await Employee.updateMany(
+        {},
+        {
+          $pull: {
+            Notice: {
+              noticeId: { $eq: noticeId } // Specify the noticeId you want to remove
+            }
+          }
+        },
+        { new: true }
+      );
+      io.emit("noticeDelete", true);
+      // await newPdf.save();
+      res.status(201).json({
+        message: "ok"
+      });
+      // res.send({ status: "ok", data: newPdf });
+    } catch (error) {
+      res.status(400).send(error);
+      // res.json({ status: error });
+    }
+  });
+  //abhay:- task is assigned to manager by Admin
+  socket.on("managerTaskNotification", async (data) => {
+    try {
+      const { managerEmail } = data;
+      const employee = await Employee.findOne({ Email: managerEmail });
+
+      let targetUser = Object.values(users).find(
+        (user) => user.email === managerEmail
+      );
+      if (employee && targetUser) {
+        const { taskId, taskName, senderMail, status, path } = data;
+        console.log(users);
+
+        employee.Notification.unshift({
+          path,
+          taskId,
+          taskName,
+          senderMail,
+          status,
+          managerEmail
+        });
+
+        await employee.save();
+        io.to(targetUser.socketId).emit("taskNotificationReceived", data);
+      } else if (employee) {
+        const { taskId, taskName, senderMail, status, path } = data;
+        console.log(users);
+
+        employee.Notification.unshift({
+          path,
+          taskId,
+          taskName,
+          senderMail,
+          status,
+          managerEmail
+        });
+
+        await employee.save();
+      }
+    } catch (error) {
+      console.error("Error saving notification:", error);
+    }
+  });
+  //abhay:- task is assigned to employee by manager
+  socket.on("employeeTaskNotification", async (data) => {
+    try {
+      data.employeesEmail.forEach(async (val) => {
+        const employee = await Employee.findOne({ Email: val });
+        let targetUser = Object.values(users).find(
+          (user) => user.email === val
+        );
+
+        if (employee && targetUser) {
+          const { senderMail, taskId, taskName, status, path } = data;
+          employee.Notification.unshift({
+            path,
+            taskId,
+            taskName,
+            status,
+            senderMail,
+            EmployeeMail: val
+          });
+
+          await employee.save();
+          io.to(targetUser.socketId).emit("taskNotificationReceived", data);
+        } else if (employee) {
+          const { senderMail, taskId, taskName, status, path } = data;
+          employee.Notification.unshift({
+            path,
+            taskId,
+            taskName,
+            status,
+            senderMail,
+            EmployeeMail: val
+          });
+
+          await employee.save();
+        }
+      });
+
+      //   console.log(employee)
+
+      //   if (employee) {
+      //     const { taskId, taskName, senderMail,  status,} = data;
+      //     employee.Notification.unshift({taskId, taskName, senderMail,  status,managerEmail});
+
+      //     await employee.save();
+      //       console.log(socket.id)
+      //   }
+
+      // socket.broadcast.emit("taskNotificationReceived", data);
+    } catch (error) {
+      console.error("Error saving notification:", error);
+    }
+  });
+  //abhay:- when manager accept the task admin will get notification
+  socket.on("adminTaskNotification", async (data) => {
+    try {
+      const { adminMail } = data;
+      const employee = await Employee.findOne({ Email: adminMail });
+
+      let targetUser = Object.values(users).find(
+        (user) => user.email === adminMail
+      );
+      if (employee && targetUser) {
+        const {
+          senderMail,
+          taskName,
+          Account,
+          status,
+          adminMail,
+          taskId,
+          path,
+          taskStatus
+        } = data;
+        console.log(users);
+
+        employee.Notification.unshift({
+          senderMail,
+          taskName,
+          Account,
+          status,
+          adminMail,
+          taskId,
+          path,
+          taskStatus
+        });
+
+        await employee.save();
+        io.to(targetUser.socketId).emit("taskNotificationReceived", data);
+      } else if (employee) {
+        const {
+          senderMail,
+          taskName,
+          Account,
+          status,
+          adminMail,
+          taskId,
+          path,
+          taskStatus
+        } = data;
+        console.log(users);
+
+        employee.Notification.unshift({
+          senderMail,
+          taskName,
+          Account,
+          status,
+          adminMail,
+          taskId,
+          path,
+          taskStatus
+        });
+
+        await employee.save();
+      }
+    } catch (error) {
+      console.error("Error saving notification:", error);
+    }
+  });
+  //abhay:- when employee accept the task manager and his team will get update
+  socket.on("employeeTaskUpdateNotification", async (data) => {
+    try {
+      data.employeesEmail.forEach(async (val) => {
+        const employee = await Employee.findOne({ Email: val });
+        let targetUser = Object.values(users).find(
+          (user) => user.email === val
+        );
+
+        if (employee && targetUser) {
+          const {
+            senderMail,
+            taskId,
+            taskName,
+            status,
+            path,
+            taskStatus,
+            Account
+          } = data;
+          employee.Notification.unshift({
+            path,
+            taskId,
+            taskName,
+            taskStatus,
+            Account,
+            status,
+            senderMail,
+            EmployeeMail: val
+          });
+
+          await employee.save();
+          io.to(targetUser.socketId).emit("taskNotificationReceived", data);
+        } else if (employee) {
+          const {
+            senderMail,
+            taskId,
+            taskName,
+            status,
+            path,
+            Account,
+            taskStatus
+          } = data;
+          employee.Notification.unshift({
+            path,
+            taskId,
+            taskName,
+            Account,
+            taskStatus,
+            status,
+            senderMail,
+            EmployeeMail: val
+          });
+
+          await employee.save();
+        }
+      });
+
+      //   console.log(employee)
+
+      //   if (employee) {
+      //     const { taskId, taskName, senderMail,  status,} = data;
+      //     employee.Notification.unshift({taskId, taskName, senderMail,  status,managerEmail});
+
+      //     await employee.save();
+      //       console.log(socket.id)
+      //   }
+
+      // socket.broadcast.emit("taskNotificationReceived", data);
+    } catch (error) {
+      console.error("Error saving notification:", error);
+    }
+  });
+  socket.on("notificationPageUpdate", (data) => {
+    socket.emit("notificationPageUpdate", data);
+  });
 });
 
 //  create a server

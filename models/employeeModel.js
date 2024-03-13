@@ -4,13 +4,14 @@ const connection = require("../dbConnection/dbconnect");
 
 const employeeSchema = new mongoose.Schema({
   FirstName: { type: String, required: true },
-  MiddleName: { type: String },
+  // MiddleName: { type: String },
   LastName: { type: String },
   empID: { type: String, required: true, unmodifiable: true },
   Email: { type: String, required: true, unmodifiable: true },
   Password: { type: String, required: true },
   Gender: { type: String, required: true },
   DOB: { type: Date },
+  reportManager: { type: String },
   DateOfJoining: { type: Date },
   TerminateDate: { type: Date },
   Deleted: { type: Boolean },
@@ -37,7 +38,9 @@ const employeeSchema = new mongoose.Schema({
   Hobbies: { type: String },
   PANcardNo: { type: String },
   PermanetAddress: { type: String },
-  PresentAddress: { type: String }
+  PresentAddress: { type: String },
+  Notification: { type: [] },
+  Notice: { type: [] }
 });
 
 autoIncrement.initialize(connection);

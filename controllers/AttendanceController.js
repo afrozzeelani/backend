@@ -502,10 +502,11 @@ const todaysAttendance = async (req, res) => {
 
     // Extract relevant attendance data and send it in the response
     const attendanceData = usersWithAttendance.map((user) => {
-      const attendanceRecord = Employee.attendanceObjID;
+      const attendanceRecord = user.attendanceObjID; // Corrected
       return {
         userId: user._id,
-        name: user.FirstName,
+        FirstName: user.FirstName,
+        LastName: user.LastName,
         empID: user.empID,
         attendance: attendanceRecord
           ? attendanceRecord.years[0].months[0].dates[0]

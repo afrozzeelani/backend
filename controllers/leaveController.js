@@ -61,6 +61,8 @@ const createLeaveApplication = async (req, res) => {
             Leavetype: req.body.Leavetype,
             FromDate: req.body.FromDate,
             ToDate: req.body.ToDate,
+            managerEmail: req.body.managerEmail,
+            hrEmail: req.body.hrEmail,
             Reasonforleave: req.body.Reasonforleave,
             Status: req.body.Status,
             employee: req.params.id
@@ -107,6 +109,8 @@ const updateLeaveApplication = async (req, res) => {
         Leavetype: req.body.Leavetype,
         FromDate: req.body.FromDate,
         ToDate: req.body.ToDate,
+        managerEmail: req.body.managerEmail,
+        hrEmail: req.body.hrEmail,
         Reasonforleave: req.body.Reasonforleave,
         Status: req.body.Status,
         employee: req.params.id

@@ -3,7 +3,8 @@ const employeeRoute = express.Router();
 
 const {
   verifyAdminHR,
-  verifyEmployee
+  verifyEmployee,
+  verifyAdminHREmployee
 } = require("../middleware/authMiddleware");
 
 const {
